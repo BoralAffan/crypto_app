@@ -25,6 +25,7 @@ class CryptoCurrency {
   // String? atlDate;
   // Null? roi;
   // String? lastUpdated;
+  bool isFavourite = false;
 
   CryptoCurrency({
     this.id,

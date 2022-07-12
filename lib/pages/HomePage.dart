@@ -1,4 +1,7 @@
 import 'package:crypto_app/models/CryptoCurrency.dart';
+import 'package:crypto_app/pages/allCryptoDetails.dart';
+import 'package:crypto_app/pages/detailPage.dart';
+import 'package:crypto_app/pages/favourites.dart';
 import 'package:crypto_app/providers/marketProviders.dart';
 import 'package:crypto_app/providers/themeProviders.dart';
 import 'package:flutter/material.dart';
@@ -11,15 +14,23 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+  late TabController tabController;
+  @override
+  void initState() {
+    // TODO: implement initState
+    tabController = TabController(length: 2, vsync: this);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     ThemeModeProvider themeProvider =
         Provider.of<ThemeModeProvider>(context, listen: false);
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Home'),
-      ),
+      // appBar: AppBar(
+      //   title: Text('Home'),
+      // ),
       body: SafeArea(
           child: Container(
         padding: EdgeInsets.only(top: 20, left: 20, right: 20, bottom: 0),
@@ -49,67 +60,28 @@ class _HomePageState extends State<HomePage> {
             SizedBox(
               height: 20,
             ),
-            Expanded(child: Consumer<MarketProvider>(
-              builder: (context, marketProvider, child) {
-                if (marketProvider.isLoading == true) {
-                  return Text('data not found');
-                } else {
-                  return ListView.builder(
-                      physics: BouncingScrollPhysics(
-                          parent: AlwaysScrollableScrollPhysics()),
-                      itemCount: marketProvider.markets.length,
-                      itemBuilder: (context, index) {
-                        CryptoCurrency CurrentcryptoCurrency =
-                            marketProvider.markets[index];
-                        return ListTile(
-                          contentPadding: EdgeInsets.all(0),
-                          leading: CircleAvatar(
-                            backgroundImage:
-                                NetworkImage(CurrentcryptoCurrency.image!),
-                          ),
-                          title: Text(CurrentcryptoCurrency.name! +
-                              " #${CurrentcryptoCurrency.marketCapRank}"),
-                          subtitle:
-                              Text(CurrentcryptoCurrency.symbol!.toUpperCase()),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                '₹ ' +
-                                    CurrentcryptoCurrency.currentPrice!
-                                        .toStringAsFixed(4),
-                                style: TextStyle(
-                                    color: Colors.blue,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              Builder(builder: (context) {
-                                double priceChange =
-                                    CurrentcryptoCurrency.priceChange24h!;
-                                double PriceChangePercent =
-                                    CurrentcryptoCurrency
-                                        .priceChangePercentage24h!;
-
-                                if (priceChange < 0) {
-                                  return Text(
-                                    "${PriceChangePercent.toStringAsFixed(2)}% (${priceChange.toStringAsFixed(4)})",
-                                    style: TextStyle(color: Colors.red),
-                                  );
-                                } else {
-                                  return Text(
-                                      '+'
-                                      "${PriceChangePercent.toStringAsFixed(2)}% (${priceChange.toStringAsFixed(4)})",
-                                      style: TextStyle(color: Colors.green));
-                                }
-                              })
-                            ],
-                          ),
-                        );
-                      });
-                }
-              },
-            ))
+            TabBar(controller: tabController, tabs: [
+              Tab(
+                child: Text(
+                  'Top 20 crypto',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+              ),
+              Tab(
+                child: Text(
+                  'Favourites',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+              )
+            ]),
+            Expanded(
+              child: TabBarView(
+                physics: BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics()),
+                controller: tabController,
+                children: [AllCrypto(), Favourites()],
+              ),
+            )
           ],
         ),
       )),
